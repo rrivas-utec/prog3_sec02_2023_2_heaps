@@ -12,10 +12,12 @@ namespace utec {
 
     template <
             typename T,
-            typename Container=vector<T>
+            template <typename ...> class Container=vector
     >
     class heap {
-        Container cnt;
+        // Contanedor
+        Container<T> cnt;
+        // Metodos auxiliares
         static size_t get_left_index(size_t parent_index) { return parent_index * 2; }
         static size_t get_right_index(size_t parent_index) { return parent_index * 2 + 1; }
         static size_t get_parent_index(size_t child_index) { return child_index / 2; }
@@ -43,6 +45,7 @@ namespace utec {
             // Obtener el indice del padre
             auto parent_index = get_parent_index(index);
             if (cnt[index] < cnt[parent_index]) return;
+
             // CONDICIONES RECURSIVAS
             swap(cnt[index], cnt[parent_index]);
             // Ejecutar recursivamente el percolate up
@@ -51,17 +54,30 @@ namespace utec {
 
         void percolate_down(size_t index) {
             // CONDICIONES BASES
+            // Si no tiene hijos
+            if (!has_children(index)) return;
+            // Selecciona al hijo si es MAX: Mayor y si esl MIN: Menor
+            auto child_selected_index = get_selected_index(index);
+            if (cnt[child_selected_index] < cnt[index]) return;
 
             // CONDICIONES RECURSIVAS
+            swap(cnt[child_selected_index], cnt[index]);
+            percolate_down(child_selected_index);
         }
     public:
         heap(): cnt(1) {}
         size_t size() { return cnt.size() - 1; }
         bool empty() { return size() == 0; }
-        T top() { return cnt[1];}
+        T& top() { return cnt[1];}
         void push (T value) {
             cnt.push_back(value);
             percolate_up(size());
+        }
+
+        void pop() {
+            swap(top(), cnt.back());
+            cnt.pop_back();
+            percolate_down(1);
         }
 
 
